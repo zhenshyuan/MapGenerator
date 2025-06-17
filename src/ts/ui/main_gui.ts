@@ -324,6 +324,11 @@ export default class MainGUI {
         return this.mainRoads.roads.concat(this.coastline.roads).map(r => PolygonUtil.resizeGeometry(r, 2.5 * this.domainController.zoom, false));
     }
 
+    public get parkPolygons(): Vector[][] {
+        return this.bigParks.concat(this.smallParks)
+            .map(p => p.map(v => this.domainController.worldToScreen(v.clone())));
+    }
+
     public get coastlinePolygon(): Vector[] {
         return PolygonUtil.resizeGeometry(this.coastline.coastline, 15 * this.domainController.zoom, false);
     }

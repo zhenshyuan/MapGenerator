@@ -10,6 +10,7 @@ enum ModelGeneratorStates {
     ADD_COASTLINE,
     SUBTRACT_RIVER,
     ADD_ROADS,
+    ADD_PARKS,
     ADD_BLOCKS,
     ADD_BUILDINGS,
     CREATE_ZIP,
@@ -25,10 +26,13 @@ export default class ModelGenerator {
 
     private groundMesh: THREE.Mesh;
     private groundBsp: CSG;
-    private polygonsToProcess: Vector[][] = [];
-    private roadsGeometry = new THREE.Geometry();
+    private polygonsToProcess: {poly: Vector[]; geometry: THREE.Geometry}[] = [];
+    private minorRoadsGeometry = new THREE.Geometry();
+    private majorRoadsGeometry = new THREE.Geometry();
+    private mainRoadsGeometry = new THREE.Geometry();
     private blocksGeometry = new THREE.Geometry();
     private roadsBsp: CSG;
+    private parksGeometry = new THREE.Geometry();
     private buildingsGeometry = new THREE.Geometry();
     private buildingsToProcess: BuildingModel[];
 
@@ -40,6 +44,7 @@ export default class ModelGenerator {
                 private mainRoads: Vector[][],
                 private majorRoads: Vector[][],
                 private minorRoads: Vector[][],
+                private parks: Vector[][],
                 private buildings: BuildingModel[],
                 private blocks: Vector[][]) {
     }
@@ -98,24 +103,50 @@ export default class ModelGenerator {
                 const riverSTL = this.exportSTL.fromMesh(riverMesh);
                 this.zip.file("model/river.stl", riverSTL);
                 this.setState(ModelGeneratorStates.ADD_ROADS);
-                this.polygonsToProcess = this.minorRoads.concat(this.majorRoads).concat(this.mainRoads);
+                this.polygonsToProcess = [];
+                for (const r of this.minorRoads) this.polygonsToProcess.push({poly: r, geometry: this.minorRoadsGeometry});
+                for (const r of this.majorRoads) this.polygonsToProcess.push({poly: r, geometry: this.majorRoadsGeometry});
+                for (const r of this.mainRoads) this.polygonsToProcess.push({poly: r, geometry: this.mainRoadsGeometry});
                 break;
             }
             case ModelGeneratorStates.ADD_ROADS: {
                 if (this.polygonsToProcess.length === 0) {
-                    const mesh = new THREE.Mesh(this.roadsGeometry);
-                    this.threeToBlender(mesh);
-                    const buildingsSTL = this.exportSTL.fromMesh(mesh);
-                    this.zip.file("model/roads.stl", buildingsSTL);
-                    
-                    this.setState(ModelGeneratorStates.ADD_BLOCKS);
-                    this.polygonsToProcess = [...this.blocks];
+                    const minorMesh = new THREE.Mesh(this.minorRoadsGeometry);
+                    this.threeToBlender(minorMesh);
+                    this.zip.file("model/minor_roads.stl", this.exportSTL.fromMesh(minorMesh));
+
+                    const majorMesh = new THREE.Mesh(this.majorRoadsGeometry);
+                    this.threeToBlender(majorMesh);
+                    this.zip.file("model/major_roads.stl", this.exportSTL.fromMesh(majorMesh));
+
+                    const mainMesh = new THREE.Mesh(this.mainRoadsGeometry);
+                    this.threeToBlender(mainMesh);
+                    this.zip.file("model/main_roads.stl", this.exportSTL.fromMesh(mainMesh));
+
+                    this.setState(ModelGeneratorStates.ADD_PARKS);
+                    this.polygonsToProcess = this.parks.map(p => ({poly: p, geometry: this.parksGeometry}));
                     break;
                 }
 
-                const road = this.polygonsToProcess.pop();
-                const roadsMesh = this.polygonToMesh(road, 0);
-                this.roadsGeometry.merge(roadsMesh.geometry as THREE.Geometry, this.groundMesh.matrix);
+                const task = this.polygonsToProcess.pop();
+                const roadsMesh = this.polygonToMesh(task.poly, 0);
+                task.geometry.merge(roadsMesh.geometry as THREE.Geometry, this.groundMesh.matrix);
+                break;
+            }
+            case ModelGeneratorStates.ADD_PARKS: {
+                if (this.polygonsToProcess.length === 0) {
+                    const mesh = new THREE.Mesh(this.parksGeometry);
+                    this.threeToBlender(mesh);
+                    this.zip.file("model/parks.stl", this.exportSTL.fromMesh(mesh));
+
+                    this.setState(ModelGeneratorStates.ADD_BLOCKS);
+                    this.polygonsToProcess = this.blocks.map(b => ({poly: b, geometry: this.blocksGeometry}));
+                    break;
+                }
+
+                const park = this.polygonsToProcess.pop();
+                const parkMesh = this.polygonToMesh(park.poly, 0);
+                park.geometry.merge(parkMesh.geometry as THREE.Geometry, this.groundMesh.matrix);
                 break;
             }
             case ModelGeneratorStates.ADD_BLOCKS: {
@@ -127,11 +158,11 @@ export default class ModelGenerator {
 
                     this.setState(ModelGeneratorStates.ADD_BUILDINGS);
                     this.buildingsToProcess = [...this.buildings];
-                    break; 
+                    break;
                 }
 
                 const block = this.polygonsToProcess.pop();
-                const blockMesh = this.polygonToMesh(block, 1);
+                const blockMesh = this.polygonToMesh(block.poly, 1);
                 this.blocksGeometry.merge(blockMesh.geometry as THREE.Geometry, this.groundMesh.matrix);
                 break;
             }

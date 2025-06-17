@@ -191,6 +191,7 @@ class Main {
                 this.mainGui.mainRoadPolygons,
                 this.mainGui.majorRoadPolygons,
                 this.mainGui.minorRoadPolygons,
+                this.mainGui.parkPolygons,
                 this.mainGui.buildingModels,
                 blocks,
             );
