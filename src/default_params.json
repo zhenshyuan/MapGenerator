@@ -1,0 +1,62 @@
+{
+  "minorParams": {
+    "dsep": 20,
+    "dtest": 15,
+    "dstep": 1,
+    "dlookahead": 40,
+    "dcirclejoin": 5,
+    "joinangle": 0.1,
+    "pathIterations": 1000,
+    "seedTries": 300,
+    "simplifyTolerance": 0.5,
+    "collideEarly": 0
+  },
+  "majorParams": {
+    "dsep": 100,
+    "dtest": 30,
+    "dstep": 1,
+    "dlookahead": 200,
+    "dcirclejoin": 5,
+    "joinangle": 0.1,
+    "pathIterations": 1000,
+    "seedTries": 300,
+    "simplifyTolerance": 0.5,
+    "collideEarly": 0
+  },
+  "mainParams": {
+    "dsep": 400,
+    "dtest": 200,
+    "dstep": 1,
+    "dlookahead": 500,
+    "dcirclejoin": 5,
+    "joinangle": 0.1,
+    "pathIterations": 1000,
+    "seedTries": 300,
+    "simplifyTolerance": 0.5,
+    "collideEarly": 0
+  },
+  "coastlineParams": {
+    "coastNoise": {
+      "noiseEnabled": true,
+      "noiseSize": 30,
+      "noiseAngle": 20
+    },
+    "riverNoise": {
+      "noiseEnabled": true,
+      "noiseSize": 30,
+      "noiseAngle": 20
+    },
+    "riverBankSize": 10,
+    "riverSize": 30,
+    "dsep": 20,
+    "dtest": 15,
+    "dstep": 1,
+    "dlookahead": 40,
+    "dcirclejoin": 5,
+    "joinangle": 0.1,
+    "pathIterations": 10000,
+    "seedTries": 300,
+    "simplifyTolerance": 10,
+    "collideEarly": 0
+  }
+}
