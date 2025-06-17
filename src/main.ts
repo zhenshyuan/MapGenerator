@@ -279,6 +279,30 @@ class Main {
         element.clear();
     }
 
+    async loadDefaultParams(jsonUrl: string): Promise<void> {
+        try {
+            const response = await fetch(jsonUrl);
+            const params = await response.json();
+            const gui: any = this.mainGui as any;
+
+            if (params.coastlineParams) {
+                Object.assign(gui.coastlineParams, params.coastlineParams);
+            }
+            if (params.mainParams) {
+                Object.assign(gui.mainParams, params.mainParams);
+            }
+            if (params.majorParams) {
+                Object.assign(gui.majorParams, params.majorParams);
+            }
+            if (params.minorParams) {
+                Object.assign(gui.minorParams, params.minorParams);
+            }
+            Util.updateGui(this.roadsFolder);
+        } catch (e) {
+            log.error('Failed to load parameters', e);
+        }
+    }
+
     private showTensorField(): boolean {
         return !this.tensorFolder.closed || this.mainGui.roadsEmpty();
     }
@@ -322,5 +346,6 @@ class Main {
 // Add log to window so we can use log.setlevel from the console
 (window as any).log = log;
 window.addEventListener('load', (): void => {
-    new Main();
+    const app = new Main();
+    (window as any).mapGeneratorApp = app;   // expose for custom HTML
 });
