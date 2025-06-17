@@ -1,4 +1,11 @@
 {
+  "generateOptions": {
+    "water": true,
+    "main": true,
+    "major": true,
+    "minor": true,
+    "buildings": true
+  },
   "minorParams": {
     "dsep": 20,
     "dtest": 15,

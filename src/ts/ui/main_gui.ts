@@ -34,6 +34,13 @@ export default class MainGUI {
     private animate: boolean = true;
     private animationSpeed: number = 30;
 
+    // Generation toggles
+    public generateWater: boolean = true;
+    public generateMainRoads: boolean = true;
+    public generateMajorRoads: boolean = true;
+    public generateMinorRoads: boolean = true;
+    public generateBuildings: boolean = true;
+
     private coastline: WaterGUI;
     private mainRoads: RoadGUI;
     private majorRoads: RoadGUI;
@@ -64,6 +71,11 @@ export default class MainGUI {
         // guiFolder.add(this, 'simpleBenchMark');
         const animateController = guiFolder.add(this, 'animate');
         guiFolder.add(this, 'animationSpeed');
+        guiFolder.add(this, 'generateWater');
+        guiFolder.add(this, 'generateMainRoads');
+        guiFolder.add(this, 'generateMajorRoads');
+        guiFolder.add(this, 'generateMinorRoads');
+        guiFolder.add(this, 'generateBuildings');
 
         this.coastlineParams = Object.assign({
             coastNoise: {
@@ -235,13 +247,77 @@ export default class MainGUI {
         this.tensorField.parks.push(...this.smallParks);
     }
 
+    private clearWater(): void {
+        this.coastline.clearStreamlines();
+        this.mainRoads.clearStreamlines();
+        this.majorRoads.clearStreamlines();
+        this.minorRoads.clearStreamlines();
+        this.bigParks = [];
+        this.smallParks = [];
+        this.buildings.reset();
+        this.tensorField.parks = [];
+        this.tensorField.sea = [];
+        this.tensorField.river = [];
+    }
+
+    private clearMain(): void {
+        this.mainRoads.clearStreamlines();
+        this.majorRoads.clearStreamlines();
+        this.minorRoads.clearStreamlines();
+        this.bigParks = [];
+        this.smallParks = [];
+        this.buildings.reset();
+        this.tensorField.parks = [];
+    }
+
+    private clearMajor(): void {
+        this.majorRoads.clearStreamlines();
+        this.minorRoads.clearStreamlines();
+        this.bigParks = [];
+        this.smallParks = [];
+        this.buildings.reset();
+        this.tensorField.parks = [];
+    }
+
+    private clearMinor(): void {
+        this.minorRoads.clearStreamlines();
+        this.smallParks = [];
+        this.buildings.reset();
+        this.tensorField.parks = this.bigParks;
+    }
+
     async generateEverything() {
-        this.coastline.generateRoads();
-        await this.mainRoads.generateRoads();
-        await this.majorRoads.generateRoads(this.animate);
-        await this.minorRoads.generateRoads(this.animate);
+        if (this.generateWater) {
+            this.coastline.generateRoads();
+        } else {
+            this.clearWater();
+        }
+
+        if (this.generateMainRoads) {
+            await this.mainRoads.generateRoads();
+        } else {
+            this.clearMain();
+        }
+
+        if (this.generateMajorRoads) {
+            await this.majorRoads.generateRoads(this.animate);
+        } else {
+            this.clearMajor();
+        }
+
+        if (this.generateMinorRoads) {
+            await this.minorRoads.generateRoads(this.animate);
+        } else {
+            this.clearMinor();
+        }
+
         this.redraw = true;
-        await this.buildings.generate(this.animate);
+
+        if (this.generateBuildings) {
+            await this.buildings.generate(this.animate);
+        } else {
+            this.buildings.reset();
+        }
     }
 
     update() {

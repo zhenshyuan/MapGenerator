@@ -297,6 +297,23 @@ class Main {
             if (params.minorParams) {
                 Object.assign(gui.minorParams, params.minorParams);
             }
+            if (params.generateOptions) {
+                if (typeof params.generateOptions.water !== 'undefined') {
+                    gui.generateWater = params.generateOptions.water;
+                }
+                if (typeof params.generateOptions.main !== 'undefined') {
+                    gui.generateMainRoads = params.generateOptions.main;
+                }
+                if (typeof params.generateOptions.major !== 'undefined') {
+                    gui.generateMajorRoads = params.generateOptions.major;
+                }
+                if (typeof params.generateOptions.minor !== 'undefined') {
+                    gui.generateMinorRoads = params.generateOptions.minor;
+                }
+                if (typeof params.generateOptions.buildings !== 'undefined') {
+                    gui.generateBuildings = params.generateOptions.buildings;
+                }
+            }
             Util.updateGui(this.roadsFolder);
         } catch (e) {
             log.error('Failed to load parameters', e);
