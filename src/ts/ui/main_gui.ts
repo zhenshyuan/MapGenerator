@@ -90,6 +90,7 @@ export default class MainGUI {
             },
             riverBankSize: 10,
             riverSize: 30,
+            seaPercent: 0.3,
         }, this.minorParams);
         this.coastlineParams.pathIterations = 10000;
         this.coastlineParams.simplifyTolerance = 10;

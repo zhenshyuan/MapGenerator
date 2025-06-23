@@ -39,7 +39,7 @@ Alternatively, add radial or grid fields manually. You can drag them to set thei
 
 Open the `Maps` folder to start creating roads. You can click `generateEverything` or step through the process manually.
 
-- **Water** - generate until you find a sea and river combination you like. Under the params folders, you can change the noise parameters to control how rough the shore and river bank are. The `simplifyTolerance` controls how closely the road follows the waterline.
+- **Water** - generate until you find a sea and river combination you like. Under the params folders, you can change the noise parameters to control how rough the shore and river bank are. Use `seaPercent` to roughly control how much of the map is covered by water. The `simplifyTolerance` controls how closely the road follows the waterline.
 - **Roads** - There are three road sizes: `main`, `major`, `minor`. Under each of the folders, you can click generate to create each class of roads individually. You can go back and edit the tensor field at any point in this process to create roads on different tensor fields. Experiment.
 - **Buildings** - click `addBuildings` to fill the city with buildings. If you can't see them, the chosen style might not display buildings, or you might not be zoomed in enough. The `Default` style, and `GoogleNoZoom` styles both show buildings at all zoom levels. You can change the minimum building size, and the sidewalk size with `shrinkSpacing`.
 - **Animation** - Generation will be faster if you untick 'Animate', but note that this will swamp the UI thread so you won't be able to pan, zoom, or retry until generation has completed. Animation speed gives you a tradeoff between FPS and generation time.
