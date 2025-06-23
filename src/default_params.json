@@ -55,6 +55,7 @@
     },
     "riverBankSize": 10,
     "riverSize": 30,
+    "seaPercent": 0.3,
     "dsep": 20,
     "dtest": 15,
     "dstep": 1,

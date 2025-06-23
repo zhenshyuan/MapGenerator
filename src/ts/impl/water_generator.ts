@@ -11,6 +11,10 @@ export interface WaterParams extends StreamlineParams {
     riverNoise: NoiseStreamlineParams;
     riverBankSize: number;
     riverSize: number;
+    /**
+     * Approximate fraction of the map covered by sea (0-1)
+     */
+    seaPercent: number;
 }
 
 export interface NoiseStreamlineParams {
@@ -55,36 +59,54 @@ export default class WaterGenerator extends StreamlineGenerator {
     }
 
     createCoast(): void {
-        let coastStreamline;
-        let seed;
-        let major;
+        let bestStreamline: Vector[] = [];
+        let bestMajor = true;
+        let bestDiff = Infinity;
 
         if (this.params.coastNoise.noiseEnabled) {
-            this.tensorField.enableGlobalNoise(this.params.coastNoise.noiseAngle, this.params.coastNoise.noiseSize);    
+            this.tensorField.enableGlobalNoise(this.params.coastNoise.noiseAngle, this.params.coastNoise.noiseSize);
         }
-        for (let i = 0; i < this.TRIES; i++) {
-            major = Math.random() < 0.5;
-            seed = this.getSeed(major);
-            coastStreamline = this.extendStreamline(this.integrateStreamline(seed, major));
 
-            if (this.reachesEdges(coastStreamline)) {
+        for (let i = 0; i < this.TRIES; i++) {
+            const major = Math.random() < 0.5;
+            const seed = this.getSeed(major);
+            const streamline = this.extendStreamline(this.integrateStreamline(seed, major));
+
+            if (!this.reachesEdges(streamline)) {
+                continue;
+            }
+
+            const road = this.simplifyStreamline(streamline);
+            const seaPoly = this.getSeaPolygon(road);
+            const area = PolygonUtil.calcPolygonArea(seaPoly);
+            const total = this.worldDimensions.x * this.worldDimensions.y;
+            const ratio = area / total;
+            const diff = Math.abs(ratio - this.params.seaPercent);
+
+            if (diff < bestDiff) {
+                bestDiff = diff;
+                bestStreamline = streamline;
+                bestMajor = major;
+            }
+
+            if (diff < 0.05) {
                 break;
             }
         }
         this.tensorField.disableGlobalNoise();
 
-        this._coastline = coastStreamline;
-        this.coastlineMajor = major;
+        this._coastline = bestStreamline;
+        this.coastlineMajor = bestMajor;
 
-        const road = this.simplifyStreamline(coastStreamline);
+        const road = this.simplifyStreamline(bestStreamline);
         this._seaPolygon = this.getSeaPolygon(road);
         this.allStreamlinesSimple.push(road);
         this.tensorField.sea = (this._seaPolygon);
 
         // Create intermediate samples
         const complex = this.complexifyStreamline(road);
-        this.grid(major).addPolyline(complex);
-        this.streamlines(major).push(complex);
+        this.grid(bestMajor).addPolyline(complex);
+        this.streamlines(bestMajor).push(complex);
         this.allStreamlines.push(complex);
     }
 
